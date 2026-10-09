@@ -1,0 +1,14 @@
+id: no-card-data-in-logs
+language: cpp
+severity: error
+message: Payment card data (PAN, CVV, expiry) must never be logged or persisted (PCI DSS).
+note: Platform/compliance team owns this rule.
+files:
+  - "misc/**/*.cpp"
+  - "editor/**/*.cpp"
+  - "scene/**/*.cpp"
+rule:
+  pattern: print_line($$$ARGS)
+  has:
+    stopBy: end
+    regex: '(?i)card|cvv|cvc'

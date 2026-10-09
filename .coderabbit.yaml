@@ -19,8 +19,47 @@ reviews:
         Core is a dependency of everything. Treat any change to a public signature or
         return-value contract as breaking: list the callers in scene/, editor/ and modules/
         that depend on the old behaviour.
+    - path: "misc/playrix_demo/**"
+      instructions: |
+        Player-facing game code. Review against: COPPA (consent and age gate before collecting
+        any child data), GDPR/UK GDPR (new PII fields, logs, third-party sharing), UK Age-Appropriate
+        Design Code (privacy-protective defaults for children), App Store/Google Play policies
+        (loot-box odds disclosure, refund/cancel path), EU consumer law (full price incl. VAT,
+        no fake reference prices or fake urgency, real-money equivalent for virtual currency),
+        and PCI DSS (never log or persist card number, CVV or expiry).
   pre_merge_checks:
     custom_checks:
+      - name: "COPPA: age gate before data collection"
+        mode: "error"
+        instructions: |
+          Fail if the PR adds code that collects, stores or transmits player data (identifiers, email,
+          birth date, location) without first checking an age gate or child-account flag, or that
+          reads a child-account flag but ignores it. Pass if the PR touches no player data.
+      - name: "GDPR: no new PII in logs or sharing"
+        mode: "error"
+        instructions: |
+          Fail if the PR logs personal data (email, device ID, birth date, location, name) or sends it
+          to a third party without a consent check. Pass if no personal data is handled.
+      - name: "AADC: privacy-protective defaults"
+        mode: "warning"
+        instructions: |
+          Fail if a new settings structure defaults profile visibility, location sharing, partner
+          sharing or personalised ads to enabled. Defaults must be off for children's services.
+      - name: "Store policy: odds and refund disclosure"
+        mode: "warning"
+        instructions: |
+          Fail if the PR adds randomised paid rewards (loot boxes) without exposing drop odds to the
+          player, or adds a purchase flow without a confirmation step and refund/cancellation info.
+      - name: "EU consumer law: price clarity"
+        mode: "warning"
+        instructions: |
+          Fail if displayed prices exclude VAT, show an invented "was" price or fake countdown, or
+          show virtual-currency cost without the real-money equivalent.
+      - name: "PCI DSS: no card data in logs or storage"
+        mode: "error"
+        instructions: |
+          Fail if card number (PAN), CVV/CVC or expiry is logged, stored in a member, or written to
+          disk or any persistent store. Pass if card data is only passed to the payment provider.
       - name: "Dialog must extend AcceptDialog"
         mode: "error"
         instructions: |

@@ -86,6 +86,7 @@
 #include "editor/gui/editor_file_dialog.h"
 #include "editor/gui/editor_icon_manager.h"
 #include "editor/gui/editor_quick_open_dialog.h"
+#include "editor/gui/recent_scenes_dialog.h"
 #include "editor/gui/editor_title_bar.h"
 #include "editor/gui/editor_toaster.h"
 #include "editor/gui/progress_dialog.h"
@@ -3508,6 +3509,9 @@ void EditorNode::_menu_option_confirm(int p_option, bool p_confirmed) {
 		case SCENE_QUICK_OPEN_SCRIPT: {
 			quick_open_dialog->popup_dialog({ "Script" }, callable_mp(this, &EditorNode::_quick_opened), true);
 		} break;
+		case SCENE_OPEN_RECENT_DIALOG: {
+			recent_scenes_dialog->popup_recent();
+		} break;
 		case SCENE_OPEN_PREV: {
 			if (!prev_closed_scenes.is_empty()) {
 				String path = prev_closed_scenes[prev_closed_scenes.size() - 1];
@@ -5587,6 +5591,10 @@ void EditorNode::_add_to_recent_scenes(const String &p_scene) {
 	}
 
 	EditorSettings::get_singleton()->set_project_metadata("recent_files", "scenes", rc);
+}
+
+Array EditorNode::get_recent_scene_entries() const {
+	return EditorSettings::get_singleton()->get_project_metadata("recent_files", "scenes", Array());
 }
 
 void EditorNode::_open_recent_scene(int p_idx) {
@@ -8156,6 +8164,7 @@ void EditorNode::_build_file_menu(bool p_dark_mode) {
 		recent_scenes->connect(SceneStringName(id_pressed), callable_mp(this, &EditorNode::_open_recent_scene));
 	}
 	file_menu->add_submenu_node_item(TTRC("Open Recent"), recent_scenes, SCENE_OPEN_RECENT);
+	file_menu->add_item(TTRC("Recent Scenes..."), SCENE_OPEN_RECENT_DIALOG);
 	file_menu->add_separator();
 
 	file_menu->add_icon_shortcut(get_editor_theme_native_menu_icon(SNAME("Save"), menu_type == MENU_TYPE_GLOBAL, p_dark_mode), ED_GET_SHORTCUT("editor/save_scene"), SCENE_SAVE_SCENE);
@@ -9356,6 +9365,9 @@ EditorNode::EditorNode() {
 
 	layout_dialog = memnew(EditorLayoutsDialog);
 	gui_base->add_child(layout_dialog);
+
+	recent_scenes_dialog = memnew(RecentScenesDialog);
+	gui_base->add_child(recent_scenes_dialog);
 	layout_dialog->set_hide_on_ok(false);
 	layout_dialog->set_size(Size2(225, 270) * EDSCALE);
 	layout_dialog->connect("name_confirmed", callable_mp(this, &EditorNode::_dialog_action));

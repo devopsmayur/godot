@@ -141,7 +141,11 @@ void AcceptDialog::_ok_pressed() {
 		set_visible(false);
 	}
 	ok_pressed();
-	emit_signal(SceneStringName(confirmed));
+	if (hide_on_ok) {
+		// Dialogs that manage their own lifecycle (hide_on_ok == false) already handle
+		// confirmation in ok_pressed(); don't notify listeners a second time.
+		emit_signal(SceneStringName(confirmed));
+	}
 	set_input_as_handled();
 }
 

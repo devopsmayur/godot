@@ -49,6 +49,7 @@ class AcceptDialog;
 class BoxContainer;
 class ColorPicker;
 class ConfirmationDialog;
+class RecentScenesDialog;
 class Control;
 class FileDialog;
 class HBoxContainer;
@@ -233,6 +234,7 @@ public:
 		RESOURCE_SAVE,
 		RESOURCE_SAVE_AS,
 		SETTINGS_PICK_MAIN_SCENE,
+		SCENE_OPEN_RECENT_DIALOG,
 	};
 
 	struct ExecuteThreadArgs {
@@ -404,6 +406,7 @@ private:
 	Ref<ConfigFile> default_layout;
 	PopupMenu *editor_layouts = nullptr;
 	EditorLayoutsDialog *layout_dialog = nullptr;
+	RecentScenesDialog *recent_scenes_dialog = nullptr;
 
 	ConfirmationDialog *gradle_build_manage_templates = nullptr;
 	ConfirmationDialog *install_android_build_template = nullptr;
@@ -769,6 +772,9 @@ public:
 	bool is_editor_ready() const { return is_inside_tree() && !waiting_for_first_scan; }
 
 	static EditorNode *get_singleton() { return singleton; }
+
+	// Returns the paths of recently opened scenes, most recent first.
+	Array get_recent_scene_entries() const;
 
 	static EditorLog *get_log() { return singleton->log; }
 	static EditorData &get_editor_data() { return singleton->editor_data; }
